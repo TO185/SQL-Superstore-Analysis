@@ -34,7 +34,7 @@ Complete data analysis of Superstore sales data using MySQL. Analyzed 9,694 tran
 3. Increase inventory before November
 
 ## 📁 Files
-- `all_20_queries.sql` - Complete SQL analysis
+- `superstores.sql` - Complete SQL analysis
 - `Sample_Superstore.csv` - Original dataset
 
 ## 👨‍💻 Author
