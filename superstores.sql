@@ -4,6 +4,96 @@
 -- TOTAL QUERIES: 20 (Basic to Advanced)
 -- =====================================================
 
+-- Temporary table for raw data
+CREATE TABLE temp_superstore (
+    row_id INT,
+    order_id VARCHAR(50),
+    order_date VARCHAR(20),
+    ship_date VARCHAR(20),
+    ship_mode VARCHAR(50),
+    customer_id VARCHAR(50),
+    customer_name VARCHAR(100),
+    segment VARCHAR(50),
+    country VARCHAR(50),
+    city VARCHAR(50),
+    state VARCHAR(50),
+    postal_code VARCHAR(20),
+    region VARCHAR(50),
+    product_id VARCHAR(50),
+    category VARCHAR(50),
+    sub_category VARCHAR(50),
+    product_name VARCHAR(255),
+    sales DECIMAL(10,4),
+    quantity INT,
+    discount DECIMAL(5,4),
+    profit DECIMAL(10,4)
+);
+
+-- ========================================
+-- 1. CUSTOMERS TABLE (Duplicate Free)
+-- ========================================
+CREATE TABLE customers AS
+SELECT 
+    customer_id,
+    MAX(customer_name) as customer_name,
+    MAX(segment) as segment,
+    MAX(country) as country,
+    MAX(city) as city,
+    MAX(state) as state,
+    MAX(postal_code) as postal_code,
+    MAX(region) as region
+FROM temp_superstore
+WHERE customer_id IS NOT NULL
+GROUP BY customer_id;
+
+-- Add primary key
+ALTER TABLE customers ADD PRIMARY KEY (customer_id);
+
+-- ========================================
+-- 2. PRODUCTS TABLE
+-- ========================================
+CREATE TABLE products AS
+SELECT 
+    product_id,
+    MAX(product_name) as product_name,
+    MAX(category) as category,
+    MAX(sub_category) as sub_category
+FROM temp_superstore
+WHERE product_id IS NOT NULL
+GROUP BY product_id;
+
+-- Add primary key
+ALTER TABLE products ADD PRIMARY KEY (product_id);
+
+-- ========================================
+-- 3. ORDERS TABLE
+-- ========================================
+CREATE TABLE orders AS
+SELECT 
+    row_id,
+    order_id,
+    STR_TO_DATE(order_date, '%m/%d/%Y') as order_date,
+    STR_TO_DATE(ship_date, '%m/%d/%Y') as ship_date,
+    ship_mode,
+    customer_id,
+    product_id,
+    sales,
+    quantity,
+    discount,
+    profit
+FROM temp_superstore;
+
+-- Add primary key
+ALTER TABLE orders ADD PRIMARY KEY (row_id);
+
+-- Add foreign keys
+ALTER TABLE orders 
+ADD FOREIGN KEY (customer_id) REFERENCES customers(customer_id);
+
+ALTER TABLE orders 
+ADD FOREIGN KEY (product_id) REFERENCES products(product_id);
+
+
 USE superstore_analysis;
 
 -- =====================================================
@@ -318,3 +408,4 @@ FROM orders o
 JOIN customers c ON o.customer_id = c.customer_id 
 GROUP BY c.region 
 ORDER BY profit DESC;
+
